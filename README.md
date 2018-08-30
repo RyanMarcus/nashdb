@@ -10,7 +10,7 @@ NashDB is available under the AGPL-3.0 license.
 
 ## Usage
 
-The primary entry point for the public-facing API is [`NashDB.java`](https://github.com/RyanMarcus/nashdb/blob/master/src/main/java/edu/brandeis/nashdb/NashDB.java). More complete documentation will be released soon, but for now [check out the examples](https://github.com/RyanMarcus/nashdb/tree/master/src/main/java/edu/brandeis/nashdb/examples).
+The primary entry point for the public-facing API is [`NashDB.java`](https://github.com/RyanMarcus/nashdb/blob/master/src/main/java/edu/brandeis/nashdb/NashDB.java). [cCeck out the examples](https://github.com/RyanMarcus/nashdb/tree/master/src/main/java/edu/brandeis/nashdb/examples) and the JavaDoc comments in the `NashDB` class.
 
 The `NashDB` class has a `toJSON` method that will automatically produce fragments, VM assignments, and a tuple value graph. The output looks like this:
 
