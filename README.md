@@ -593,3 +593,6 @@ The `NashDB` class has a `toJSON` method that will automatically produce fragmen
   ]
 }
 ```
+
+# Acknowledgments
+This research was funded by NSF IIS 1253196
