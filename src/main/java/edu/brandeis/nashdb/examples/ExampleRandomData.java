@@ -23,6 +23,17 @@ import java.util.Random;
 import edu.brandeis.nashdb.FragmentationStrategy;
 import edu.brandeis.nashdb.NashDB;
 
+import org.json.simple.JSONArray; 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+
+
+
+
 /**
  * Generates an example JSON structure from random data
  * @author "Ryan Marcus <ryan@ryanmarc.us>"
@@ -65,13 +76,16 @@ public class ExampleRandomData {
 		
 		nash.noteQuery(start, stop, 1);
 	}
-	
+	private static int clearBit(int num, int i) {
+		int mask = (1<<i) - 1;
+		System.out.println(mask);
+		return num & mask;
+	}
 	public static void main(String[] args) {
 		NashDB nash = NashDB.freshNashDBInstance(NUM_TUPLES);
 		
 		for (int i = 0; i < NUM_QUERIES; i++)
 			addRandomQuery(nash);
-		
 		System.out.println(nash.toJSON(FragmentationStrategy.OPTIMAL, NUM_FRAGMENTS));
 	}
 }

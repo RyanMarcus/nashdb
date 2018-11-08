@@ -1,4 +1,4 @@
-// < begin copyright > 
+    // < begin copyright > 
 // Copyright Ryan Marcus 2018
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import edu.brandeis.nashdb.TransitionAction;
  */
 public class ExampleTransition {
 
-	private static class VM implements FragmentHolder {
+	public static class VM implements FragmentHolder {
 
 		private final Collection<Fragment> fragments;
 		private final int id;
@@ -72,7 +72,6 @@ public class ExampleTransition {
 
 		NashDB nash = NashDB.freshNashDBInstance(100);
 		Collection<TransitionAction<VM>> plan = nash.computeTransition(before, after);
-		
 		for (TransitionAction<VM> ta : plan) {
 			System.out.println(ta);
 		}
