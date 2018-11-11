@@ -95,14 +95,14 @@ public class NashEquilbFinder {
 		}
 		
 		// now we have packed everything required, allocate our excess resources
-		// to the most popular fragments possible
-		for (VM vm : toR) {
-			for (Fragment extra : sortedFrags) {
-				if (vm.canFitFragment(extra)) {
-					vm.addFragment(extra);
-				}
-			}
-		}
+		// to the most popular fragments possible TODO re-enable for non-demo
+//		for (VM vm : toR) {
+//			for (Fragment extra : sortedFrags) {
+//				if (vm.canFitFragment(extra)) {
+//					vm.addFragment(extra);
+//				}
+//			}
+//		}
 		
 		return new HashSet<>(toR);
 	}
