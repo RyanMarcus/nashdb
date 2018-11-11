@@ -231,12 +231,17 @@ public class JSONFormatter {
 			double sum = 0;
 			int start = ((Long) result.get("start")).intValue();
 			int end = ((Long) result.get("end")).intValue();
+			
 			for (int j = start; j <= end; j++) {
 				int graphDataArrayIndex = 0;
 				boolean found = false;
 				while (!found) {
 					if (graphDataArray[graphDataArrayIndex].end() < (j-1)) {
 						graphDataArrayIndex++;
+						if (graphDataArrayIndex <= graphDataArray.length) {
+							sum+= graphDataArray[graphDataArray.length-1].value();
+							found = true;
+						}
 					} else {
 //						System.out.println("sum" + graphDataArray[graphDataArrayIndex].value());
 						sum += graphDataArray[graphDataArrayIndex].value();
@@ -244,7 +249,6 @@ public class JSONFormatter {
 					}
 				}
 			}
-			
 			double mean = sum / (end - start);
 			String color;
 			if (!colorMap.containsKey(start)) {

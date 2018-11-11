@@ -47,7 +47,6 @@ public class Scn2JSONFormattor {
 	// call toJSON
 	// spit that back to the client 
 	public static String generateJSON(String queryVolume, String queryBudget) {
-		if (queryVolume != queryBudget) System.out.println("error");//return an error
 		JSONParser JSONparser = new JSONParser();
 		JSONArray qvArray = new JSONArray();
 		JSONArray qbArray = new JSONArray();
@@ -57,13 +56,15 @@ public class Scn2JSONFormattor {
 			qbArray = (JSONArray) JSONparser.parse(queryVolume);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("could not parsed");
+			return "ERROR";//return an error
 		}
+		if (qvArray.size() != qbArray.size()) return "ERROR";//return an error
 		NashDB nash = NashDB.freshNashDBInstance(NUM_TUPLES);
+
 		for (int i = 0; i < qvArray.size(); i++) {
-			for (int j = 0; j < ((Long) qvArray.get(i)).intValue(); j++) {
-				nash.noteQuery(queries[i].getStart(), queries[i].getStop(), ((Long) qbArray.get(i)).intValue());
-				
+			for (int j = 0; j < Integer.parseInt((String)qvArray.get(i)); j++) {
+				nash.noteQuery(queries[i].getStart(), queries[i].getStop(), Integer.parseInt((String)qbArray.get(i)));
 			}
 		}
 		return createJSON(nash);
@@ -77,10 +78,9 @@ public class Scn2JSONFormattor {
 			json = (JSONObject) parser.parse(stringToParse);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("cannot parse");
 		}
 		JSONArray seriesArray = new JSONArray();
-		
 		JSONArray fragments_fromJSON =  (JSONArray) json.get("fragments");
 		JSONArray vms_fromJSON = (JSONArray) json.get("vms");
 		JSONArray graphData_fromJSON = (JSONArray) json.get("graphData");
@@ -88,21 +88,20 @@ public class Scn2JSONFormattor {
 		
 		TreeMap<Integer, Integer> colorMap = new TreeMap<Integer, Integer>();
 		TreeSet<Integer> usedColorIndexes = new TreeSet<Integer>();
-
 		JSONArray vms_object = JSONFormatter.assignFragmentsToVMS(fragments_fromJSON, vms_fromJSON, colorMap, usedColorIndexes, graphDataArray);
 		JSONArray f = JSONFormatter.returnFragmentArray(graphDataArray, fragments_fromJSON, colorMap, usedColorIndexes);
 		JSONArray transitionInfo = new JSONArray();
-		transitionInfo = JSONFormatter.returnedTransitionArray(nash, vms_fromJSON, null, fragments_fromJSON);
+//		transitionInfo = JSONFormatter.returnedTransitionArray(nash, vms_fromJSON, null, fragments_fromJSON);
 		JSONObject seriesUnit = new JSONObject();
+
 		seriesUnit.put("tuples", json.get("graphData"));
 		seriesUnit.put("fragments", f);
 		seriesUnit.put("vms", vms_object);
-		seriesUnit.put("transition", transitionInfo);
+		seriesUnit.put("transition", null);
 		seriesArray.add(seriesUnit);
 		JSONObject returnedJSON = new JSONObject();
 		returnedJSON.put("maxFragmentsInVms", MAX_FRAGS_IN_VM);
 		returnedJSON.put("series", seriesArray);
-		
 		return returnedJSON.toJSONString();
 	}
 	
