@@ -15,6 +15,7 @@ public class SampleServer {
 	public static void main(String[] args) {
 		Scn2JSONFormattor f = new Scn2JSONFormattor();;
 		//by default, Java spark runs on port 4567
+		Spark.staticFiles.location("/public");
 		Spark.init();
         Spark.post("/updateGraph", (request, response) -> {
         	response.type("application/json");
