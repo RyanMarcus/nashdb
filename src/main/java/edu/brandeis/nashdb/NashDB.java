@@ -77,7 +77,7 @@ public class NashDB {
 	 */
 	public static NashDB freshNashDBInstance(int numTuples) {
 		DensityEstimator de = new DensityEstimator(500);
-		return new NashDB(numTuples, de, 1, 200, 7000);
+		return new NashDB(numTuples, de, 1, 250, 7000);
 	}
 	
 	NashDB(int numTuples, DensityEstimator de, int vmCost, int vmSize, int timeWindow) {
@@ -108,8 +108,30 @@ public class NashDB {
 			di.next();
 		}
 		
-		
+		int lastStop = toReturn.get(toReturn.size()-1).getStop();
+		if (lastStop < this.numTuples) {
+			// add a zero range to the end
+			toReturn.add(new RangeAndValue(lastStop, numTuples, 0));
+		}
 		return Collections.unmodifiableList(toReturn);
+	}
+	
+	/**
+	 * Gets the total value associated with a fragment. This is the raw revenue that a
+	 * fragment is expected to pull in, before dividing by the number of shareholders.
+	 * @param f the fragment
+	 * @return the total value of the fragment
+	 */
+	public int getTotalFragmentValue(Fragment f) {
+		return de.getDensityInFragment(f.getStart(), f.getStop()).stream()
+				.mapToInt(i -> i)
+				.sum();
+	}
+	
+	private double getFragmentCost(Fragment f) {
+		double fSize = f.getSize();
+		double costPerUnit = (double) vmCost / (double) vmSize;
+		return fSize * costPerUnit * (double)timeWindow;
 	}
 	
 	/**
@@ -188,6 +210,77 @@ public class NashDB {
 		}
 		
 		return toReturn;
+	}
+	
+	/**
+	 * Computes the profit earned by any machine holding a copy of a fragment, for all fragments. These
+	 * numbers should be low in a good configuration (e.g., high profit implies there should be more 
+	 * replicas).
+	 * @param configuration the current cluster configuration
+	 * @return a map fo fragments to the profit earned by their producers
+	 */
+	public Map<Fragment, Double> calculateFragmentProfits(Collection<Collection<Fragment>> configuration) {
+		// first, compute a tally.
+		Map<Fragment, Integer> tally = new HashMap<>();
+		
+		configuration.stream().flatMap(vm -> vm.stream())
+		.forEach(f -> {
+			tally.merge(f, 1, (curr, inc) -> curr + inc);
+		});
+		
+		// next, compute the income each holder of this fragment gets by dividing the total
+		// income by the number of holders.
+		Map<Fragment, Double> income = new HashMap<>();
+		for (Entry<Fragment, Integer> e : tally.entrySet()) {
+			Fragment f = e.getKey();
+			int holders = e.getValue();
+			
+			int totalValue = getTotalFragmentValue(f);
+			income.put(f, (double)totalValue / (double)holders);
+		}
+		
+		// next, subtract the storage cost from each income, and return the result.
+		return income.entrySet().stream()
+		.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue() - getFragmentCost(e.getKey())));
+	}
+	
+	
+	/**
+	 * Computes the change in the number of replicas for each fragment in order to make the system
+	 * return to a Nash equilibrium.
+	 * 
+	 * @param configurations the configuration to check
+	 * @return the deltas for replication factors
+	 */
+	public Map<Fragment, Double> calculateIdealDeltas(Collection<Collection<Fragment>> configuration) {
+		Map<Fragment, Double> profits = calculateFragmentProfits(configuration);
+		Map<Fragment, Double> deltas = new HashMap<>();
+		
+		// first, compute a tally. If a fragment has only a single replica
+		// but its delta is negative, that delta should actually be zero.
+		Map<Fragment, Integer> tally = new HashMap<>();
+
+		configuration.stream().flatMap(vm -> vm.stream())
+		.forEach(f -> {
+			tally.merge(f, 1, (curr, inc) -> curr + inc);
+		});
+		
+		// divide the profit by the cost and round towards zero to get the delta
+		for (Entry<Fragment, Double> e : profits.entrySet()) {
+			double fragProfit = e.getValue();
+			double fragCost = getFragmentCost(e.getKey());
+			
+			double delta = fragProfit / fragCost;
+			
+			// check for a single fragment with a negative delta (in which case the delta should be zero,
+			// as we must keep at least one copy of every fragment)
+			if (delta < 0 && tally.get(e.getKey()) <= 1)
+				delta = 0;
+			
+			deltas.put(e.getKey(), delta);
+		}
+		
+		return deltas;
 	}
 	
 	/**

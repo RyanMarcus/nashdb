@@ -28,7 +28,7 @@ import com.eclipsesource.json.JsonValue;
  * @author "Ryan Marcus <ryan@ryanmarc.us>"
  *
  */
-public class Fragment {
+public class Fragment implements Comparable<Fragment> {
 	private final int start;
 	private final int stop;
 	
@@ -54,6 +54,38 @@ public class Fragment {
 		toReturn.add("start", start);
 		toReturn.add("end", stop);
 		return toReturn;
+	}
+	
+	public JsonValue toJSON(NashDB context) {
+		JsonObject toReturn = new JsonObject();
+		toReturn.add("start", start);
+		toReturn.add("end", stop);
+		
+		double popularity = context.getTotalFragmentValue(this);
+		double mean = popularity / (double)(stop - start);
+		toReturn.add("mean value", mean);
+		toReturn.add("popularity", popularity);
+		
+		return toReturn;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof Fragment))
+			return false;
+		
+		Fragment o = (Fragment) other;
+		return o.start == start && o.stop == stop;
+	}
+	
+	@Override
+	public int hashCode() {
+		return Integer.hashCode(start) + Integer.hashCode(stop);
+	}
+
+	@Override
+	public int compareTo(Fragment arg0) {
+		return Integer.compare(this.start, arg0.start);
 	}
 	
 	

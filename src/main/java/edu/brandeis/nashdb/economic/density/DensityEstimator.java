@@ -107,13 +107,17 @@ public class DensityEstimator {
 	}
 	
 	public List<Integer> getDensityInFragment(Fragment f) {
-		List<Integer> l = getFlatDensity(f.getStop());
+		return getDensityInFragment(f.getStart(), f.getStop());
+				
+	}
+	
+	public List<Integer> getDensityInFragment(int start, int stop) {
+		List<Integer> l = getFlatDensity(stop);
 		
-		if (l.size() < f.getStart())
+		if (l.size() < start)
 			return new ArrayList<Integer>();
 		
-		return l.subList(f.getStart(), Math.min(l.size(), f.getStop()));
-				
+		return l.subList(start, Math.min(l.size(), stop));			
 	}
 	
 	public DensityIterator iterator() {
