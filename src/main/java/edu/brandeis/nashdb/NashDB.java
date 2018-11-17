@@ -86,7 +86,7 @@ public class NashDB {
 		
 		this.vmSize = vmSize;
 		this.vmCost = vmCost;
-		this.timeWindow = timeWindow;
+		this.timeWindow = timeWindow; 
 	}
 	
 	/**

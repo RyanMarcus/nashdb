@@ -123,7 +123,10 @@ public class OptimalStrategy implements Strategy {
 		OptimalStrategy os = new OptimalStrategy(2, 10);
 		
 		System.out.println(os.executeRound(de, null));
+		//returns fragments
 		
+		//create naive strategy
+		//
 		
 	}
 
