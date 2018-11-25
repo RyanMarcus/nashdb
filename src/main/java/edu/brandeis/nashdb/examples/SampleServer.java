@@ -34,7 +34,7 @@ public class SampleServer {
         		response.status(400);
 				return "{\"message\":\"Custom 400, invalid input, array sizes are not equal\"}";
         	} else {
-        		response.status(200);
+        		response.status(201);
         		return jsonResponse;
         	}
         });
